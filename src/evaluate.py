@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import logging
 from typing import Dict
 
 import pandas as pd
@@ -60,14 +61,14 @@ def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
 
 def _get_model_scores(model, x_test):
     """Get continuous model scores for AUC metrics when available."""
+    if hasattr(model, "decision_function"):
+        return model.decision_function(x_test)
+
     if hasattr(model, "predict_proba"):
         probs = model.predict_proba(x_test)
         if probs.ndim == 2 and probs.shape[1] > 1:
             return probs[:, 1]
         return probs
-
-    if hasattr(model, "decision_function"):
-        return model.decision_function(x_test)
 
     return None
 
@@ -84,10 +85,12 @@ def evaluate_all_models(
     results: dict[str, dict] = {}
 
     for model_name, model in trained_ml_models.items():
+        logging.info("Evaluating %s...", model_name)
         predictions = model.predict(x_test_ml)
         scores = _get_model_scores(model, x_test_ml)
         results[model_name] = evaluate_predictions(y_test, predictions, y_score=scores)
 
+    logging.info("Evaluating Deep Learning model...")
     dl_probs, dl_predictions = predict_dl(dl_model, x_test_dl, threshold=dl_threshold)
     min_len = min(len(y_test), len(dl_predictions))
     results["Deep Learning"] = evaluate_predictions(

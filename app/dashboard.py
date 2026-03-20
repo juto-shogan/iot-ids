@@ -115,6 +115,22 @@ def render_artifacts() -> None:
         st.write("Preview", uploaded_df.head(10))
 
 
+
+def render_model_notes() -> None:
+    """Explain how each model works in beginner-friendly terms."""
+    st.subheader("How each model works")
+    st.markdown(
+        """
+- **Logistic Regression**: Learns a linear decision boundary and outputs attack probability from weighted features.
+- **Random Forest**: Combines many decision trees; each tree votes and the majority decision is used.
+- **SVM (RBF)**: Finds a maximum-margin boundary in transformed feature space; good for non-linear separation.
+- **KNN**: Looks at the closest training examples and predicts based on neighbor majority label.
+- **Deep Learning (DNN)**: Multi-layer neural network learns hierarchical patterns; final sigmoid output is thresholded into normal/attack.
+
+All models are trained on the same preprocessed UNSW-NB15 feature set; DL additionally uses dimensionality reduction before training for CPU-friendly runtime.
+        """
+    )
+
 def build_dashboard() -> None:
     """Build and launch Streamlit IDS dashboard."""
     st.set_page_config(page_title="IoT IDS Dashboard", layout="wide")
@@ -142,6 +158,9 @@ def build_dashboard() -> None:
         render_model_detail(selected_model, metrics_df, payload)
     with tab_artifacts:
         render_artifacts()
+
+    st.divider()
+    render_model_notes()
 
 
 if __name__ == "__main__":

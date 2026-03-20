@@ -23,7 +23,7 @@ def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
             random_state=random_seed,
             n_jobs=-1,
         ),
-        "SVM": SVC(kernel="rbf", C=1.0, gamma="scale", probability=True, random_state=random_seed),
+        "SVM": SVC(kernel="rbf", C=1.0, gamma="scale", probability=False, random_state=random_seed),
         "KNN": KNeighborsClassifier(n_neighbors=7),
     }
 
