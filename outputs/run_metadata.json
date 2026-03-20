@@ -1,10 +1,20 @@
 {
-  "timestamp_utc": "2026-03-20T13:51:37.835125+00:00",
+  "timestamp_utc": "2026-03-20T16:32:31.871032+00:00",
   "config": {
     "random_seed": 42,
-    "paths": {
+    "data": {
+      "mode": "separate_files",
       "train_file": "data/UNSW_NB15_training-set.csv",
       "test_file": "data/UNSW_NB15_testing-set.csv",
+      "label_column": null,
+      "drop_columns": [
+        "id",
+        "ID",
+        "record_id",
+        "Record_ID"
+      ]
+    },
+    "paths": {
       "models_dir": "models",
       "outputs_dir": "outputs"
     },
@@ -24,7 +34,7 @@
     }
   },
   "extra": {
-    "elapsed_seconds": 2835.51,
+    "elapsed_seconds": 2925.98,
     "x_train_shape": [
       175341,
       43
