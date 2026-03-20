@@ -185,18 +185,20 @@ def render_prediction_panel(selected_model: str, payload: dict) -> None:
     numeric_cols, categorical_cols, category_map = _extract_raw_schema(artifacts["preprocessor"])
 
     with st.form("single_prediction_form"):
-        st.caption("Enter feature values and click Predict")
+        st.caption("Enter feature values and click Predict. Numeric/categorical fields are inferred from the fitted training preprocessor.")
         values = {}
 
-        for col in numeric_cols:
-            values[col] = st.number_input(col, value=0.0, format="%.6f")
+        with st.expander("Numeric features", expanded=True):
+            for col in numeric_cols:
+                values[col] = st.number_input(col, value=0.0, format="%.6f")
 
-        for col in categorical_cols:
-            options = category_map.get(col, [])
-            if options:
-                values[col] = st.selectbox(col, options=[str(o) for o in options])
-            else:
-                values[col] = st.text_input(col, value="")
+        with st.expander("Categorical features", expanded=True):
+            for col in categorical_cols:
+                options = category_map.get(col, [])
+                if options:
+                    values[col] = st.selectbox(col, options=[str(o) for o in options])
+                else:
+                    values[col] = st.text_input(col, value="")
 
         submitted = st.form_submit_button("Predict")
 
