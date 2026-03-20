@@ -11,8 +11,8 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 
-from src.data_loader import load_train_test
-from src.evaluate import evaluate_all_models, save_metrics
+from src.data_loader import load_data_by_config
+from src.evaluate import evaluate_all_models, save_curve_data, save_metrics
 from src.feature_engineering import DLFeatureReducer, FeatureSelector
 from src.preprocessing import preprocess_train_test
 from src.train_dl import train_dl_model
@@ -25,7 +25,14 @@ from src.utils import (
     save_json,
     setup_logging,
 )
-from src.visualize import plot_confusion_matrices, plot_model_comparison
+from src.visualize import (
+    plot_confusion_matrices,
+    plot_metric_heatmap,
+    plot_model_comparison,
+    plot_pr_curves,
+    plot_radar_chart,
+    plot_roc_curves,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,13 +66,10 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
     outputs_dir = PROJECT_ROOT / config["paths"]["outputs_dir"]
     ensure_directories(models_dir=models_dir, outputs_dir=outputs_dir)
 
-    train_file = PROJECT_ROOT / config["paths"]["train_file"]
-    test_file = PROJECT_ROOT / config["paths"]["test_file"]
-
     start_time = time.perf_counter()
 
-    logging.info("Loading UNSW-NB15 training/testing datasets.")
-    x_train, y_train, x_test, y_test = load_train_test(train_file, test_file)
+    logging.info("Loading dataset based on config mode.")
+    x_train, y_train, x_test, y_test = load_data_by_config(config, PROJECT_ROOT)
 
     logging.info("Applying preprocessing pipeline.")
     x_train_processed, x_test_processed, _ = preprocess_train_test(
@@ -110,7 +114,7 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
     )
 
     logging.info("Evaluating all models.")
-    results = evaluate_all_models(
+    results, curve_data = evaluate_all_models(
         trained_ml_models=ml_models,
         dl_model=dl_model,
         dl_threshold=dl_threshold,
@@ -121,8 +125,13 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
 
     logging.info("Saving metrics and visualizations.")
     save_metrics(results, outputs_dir)
+    save_curve_data(curve_data, outputs_dir)
     plot_confusion_matrices(results, outputs_dir)
     plot_model_comparison(results, outputs_dir)
+    plot_metric_heatmap(results, outputs_dir)
+    plot_radar_chart(results, outputs_dir)
+    plot_roc_curves(curve_data, outputs_dir)
+    plot_pr_curves(curve_data, outputs_dir)
 
     elapsed_sec = time.perf_counter() - start_time
     metadata = build_run_metadata(

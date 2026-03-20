@@ -41,6 +41,12 @@ def _compute_score_metrics(y_true, y_score) -> dict:
 
 def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
     """Compute core binary classification metrics and confusion matrix."""
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    specificity = float(tn / (tn + fp)) if (tn + fp) else 0.0
+    npv = float(tn / (tn + fn)) if (tn + fn) else 0.0
+    fpr = float(fp / (fp + tn)) if (fp + tn) else 0.0
+    fnr = float(fn / (fn + tp)) if (fn + tp) else 0.0
+
     payload = {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "precision": float(precision_score(y_true, y_pred, zero_division=0)),
@@ -48,7 +54,11 @@ def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
         "f1_score": float(f1_score(y_true, y_pred, zero_division=0)),
         "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
         "mcc": float(matthews_corrcoef(y_true, y_pred)),
-        "confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
+        "specificity": specificity,
+        "npv": npv,
+        "fpr": fpr,
+        "fnr": fnr,
+        "confusion_matrix": [[int(tn), int(fp)], [int(fn), int(tp)]],
     }
 
     if y_score is not None:
@@ -80,27 +90,40 @@ def evaluate_all_models(
     x_test_ml,
     x_test_dl,
     y_test,
-) -> dict:
-    """Evaluate all trained models and return structured metrics."""
+) -> tuple[dict, dict]:
+    """Evaluate all trained models and return structured metrics and curve data."""
     results: dict[str, dict] = {}
+    curve_data: dict[str, dict] = {}
 
     for model_name, model in trained_ml_models.items():
         logging.info("Evaluating %s...", model_name)
         predictions = model.predict(x_test_ml)
         scores = _get_model_scores(model, x_test_ml)
         results[model_name] = evaluate_predictions(y_test, predictions, y_score=scores)
+        if scores is not None:
+            curve_data[model_name] = {
+                "y_true": y_test.astype(int).tolist(),
+                "y_score": pd.Series(scores).astype(float).tolist(),
+            }
 
     logging.info("Evaluating Deep Learning model...")
     dl_probs, dl_predictions = predict_dl(dl_model, x_test_dl, threshold=dl_threshold)
     min_len = min(len(y_test), len(dl_predictions))
+    dl_y_true = y_test.iloc[:min_len].astype(int)
+    dl_scores = dl_probs[:min_len]
+
     results["Deep Learning"] = evaluate_predictions(
-        y_test.iloc[:min_len],
+        dl_y_true,
         dl_predictions[:min_len],
-        y_score=dl_probs[:min_len],
+        y_score=dl_scores,
     )
     results["Deep Learning"]["threshold"] = float(dl_threshold)
+    curve_data["Deep Learning"] = {
+        "y_true": dl_y_true.tolist(),
+        "y_score": pd.Series(dl_scores).astype(float).tolist(),
+    }
 
-    return results
+    return results, curve_data
 
 
 def save_metrics(results: dict, outputs_dir: Path) -> Path:
@@ -117,6 +140,10 @@ def save_metrics(results: dict, outputs_dir: Path) -> Path:
             "f1_score": metrics["f1_score"],
             "balanced_accuracy": metrics["balanced_accuracy"],
             "mcc": metrics["mcc"],
+            "specificity": metrics["specificity"],
+            "npv": metrics["npv"],
+            "fpr": metrics["fpr"],
+            "fnr": metrics["fnr"],
             "roc_auc": metrics.get("roc_auc"),
             "pr_auc": metrics.get("pr_auc"),
             "tn": metrics["confusion_matrix"][0][0],
@@ -134,3 +161,11 @@ def save_metrics(results: dict, outputs_dir: Path) -> Path:
     save_json(results, json_path)
 
     return csv_path
+
+
+def save_curve_data(curve_data: dict, outputs_dir: Path) -> Path:
+    """Save model score traces for ROC/PR plotting."""
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    curve_path = outputs_dir / "curve_data.json"
+    save_json(curve_data, curve_path)
+    return curve_path

@@ -1,13 +1,33 @@
 random_seed: 42
+
+# Data loading modes:
+# 1) separate_files (default): provide train_file + test_file
+# 2) single_file_split: provide single_file + test_size
+# For external datasets (e.g., Kaggle), set label_column explicitly.
+data:
+#   mode: separate_files
+#   train_file: data/UNSW_NB15_training-set.csv
+#   test_file: data/UNSW_NB15_testing-set.csv
+  # single_file: data/Iot_Network_data.csv
+  data:
+  mode: single_file_split
+  single_file: data/Iot_Network_data.csv
+  label_column: <your_label_column_name>
+  
+  test_size: 0.2
+  label_column: null
+  drop_columns: [id, ID, record_id, Record_ID]
+
 paths:
-  train_file: data/UNSW_NB15_training-set.csv
-  test_file: data/UNSW_NB15_testing-set.csv
   models_dir: models
   outputs_dir: outputs
+
 preprocessing:
   variance_threshold: 0.0
+
 ml:
   svm_max_samples: 30000
+
 dl:
   enabled: true
   epochs: 20

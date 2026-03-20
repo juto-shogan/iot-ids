@@ -66,12 +66,19 @@ Or with a custom config file:
 python main.py --config config.yaml
 ```
 
+### Using a single Kaggle CSV (e.g., `Iot_Network_data.csv`)
+1. Set `data.mode: single_file_split` in `config.yaml`.
+2. Set `data.single_file: data/Iot_Network_data.csv`.
+3. Set `data.label_column` to the label column name in that dataset.
+4. Run `python main.py`.
+
 Pipeline outputs:
 
 - **models/**: trained model artifacts + preprocessors/selectors
 - **outputs/metrics.csv** and **outputs/metrics.json**
 - **outputs/run_metadata.json** (config + runtime info)
-- confusion matrix images and model comparison chart
+- **outputs/curve_data.json** for ROC/PR plotting
+- confusion matrices, model-comparison bars, metric heatmap, radar chart, ROC curves, and PR curves
 
 ## Run Dashboard
 
@@ -83,7 +90,7 @@ Dashboard features:
 
 - comparison overview tab with sortable chart
 - per-model detail tab with extended metrics
-- artifact tab (saved chart preview + CSV download)
+- artifact tab with multi-plot gallery (comparison, heatmap, radar, ROC, PR) + CSV download
 - refresh control to reload latest outputs
 
 ## Notes

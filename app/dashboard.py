@@ -12,7 +12,7 @@ import streamlit as st
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
-DEFAULT_METRICS = ["accuracy", "precision", "recall", "f1_score", "balanced_accuracy", "mcc"]
+DEFAULT_METRICS = ["accuracy", "precision", "recall", "f1_score", "balanced_accuracy", "specificity", "mcc", "roc_auc", "pr_auc", "npv", "fpr", "fnr"]
 
 
 @st.cache_data(show_spinner=False)
@@ -97,9 +97,17 @@ def render_model_detail(selected_model: str, metrics_df: pd.DataFrame, payload: 
 def render_artifacts() -> None:
     """Render saved plot previews and optional uploads."""
     st.subheader("Saved Artifacts")
-    plot_path = OUTPUTS_DIR / "model_comparison.png"
-    if plot_path.exists():
-        st.image(str(plot_path), caption="Model comparison chart", use_container_width=True)
+    artifact_images = [
+        ("model_comparison.png", "Model comparison chart"),
+        ("metric_heatmap.png", "Metric heatmap"),
+        ("radar_comparison.png", "Radar comparison"),
+        ("roc_curves.png", "ROC curves"),
+        ("pr_curves.png", "Precision-Recall curves"),
+    ]
+    for file_name, caption in artifact_images:
+        plot_path = OUTPUTS_DIR / file_name
+        if plot_path.exists():
+            st.image(str(plot_path), caption=caption, use_container_width=True)
 
     st.download_button(
         label="Download metrics.csv",
