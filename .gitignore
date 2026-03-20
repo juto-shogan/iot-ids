@@ -5,3 +5,4 @@ models/*
 !models/.gitkeep
 src\__pycache__/
 *.pyc
+d.py
