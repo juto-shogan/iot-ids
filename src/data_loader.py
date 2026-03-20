@@ -16,7 +16,28 @@ LABEL_CANDIDATES = [
 DEFAULT_DROP_COLUMNS = ["id", "ID", "record_id", "Record_ID"]
 
 
+def _normalize_label_column(label_column) -> str | None:
+    """Normalize label_column config input to a single string or None."""
+    if label_column is None:
+        return None
+    if isinstance(label_column, str):
+        cleaned = label_column.strip()
+        if not cleaned or cleaned in {"<your_label_column_name>", "null", "None"}:
+            return None
+        return cleaned
+    if isinstance(label_column, list):
+        if len(label_column) == 0:
+            return None
+        if len(label_column) == 1:
+            return _normalize_label_column(label_column[0])
+        raise ValueError(
+            f"data.label_column must be a single column name, got list with {len(label_column)} entries: {label_column}"
+        )
+    raise ValueError(f"data.label_column must be string or null, got type: {type(label_column).__name__}")
+
+
 def _detect_label_column(frame: pd.DataFrame, explicit_label: str | None = None) -> str:
+    explicit_label = _normalize_label_column(explicit_label)
     if explicit_label:
         if explicit_label not in frame.columns:
             raise ValueError(
@@ -137,7 +158,7 @@ def load_data_by_config(config: dict, project_root: Path):
     """Load dataset according to config mode: separate or single-file split."""
     data_cfg = config.get("data", {})
     mode = data_cfg.get("mode", "separate_files")
-    label_column = data_cfg.get("label_column")
+    label_column = _normalize_label_column(data_cfg.get("label_column"))
     drop_columns = data_cfg.get("drop_columns", DEFAULT_DROP_COLUMNS)
 
     if mode == "single_file_split":

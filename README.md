@@ -90,6 +90,7 @@ Dashboard features:
 
 - comparison overview tab with sortable chart
 - per-model detail tab with extended metrics
+- predict tab for manual feature entry and on-demand model inference
 - artifact tab with multi-plot gallery (comparison, heatmap, radar, ROC, PR) + CSV download
 - refresh control to reload latest outputs
 

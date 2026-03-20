@@ -8,6 +8,8 @@ data:
   mode: separate_files
   train_file: data/UNSW_NB15_training-set.csv
   test_file: data/UNSW_NB15_testing-set.csv
+  # single_file: data/Iot_Network_data.csv
+  test_size: 0.2
   label_column: null
   drop_columns: [id, ID, record_id, Record_ID]
 
