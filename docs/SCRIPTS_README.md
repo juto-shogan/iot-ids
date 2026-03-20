@@ -1,94 +1,53 @@
 # Script-by-Script Guide
 
-This file explains what each script in the repository does.
-
 ## Root
 
+### `config.yaml`
+Central configuration for paths, seed, preprocessing, ML, and DL runtime parameters.
+
 ### `main.py`
-Orchestrates the full pipeline:
-- load data
-- preprocess
-- feature selection
-- train ML models
-- train DL model
-- evaluate all models
-- save metrics/plots
+End-to-end orchestrator:
+1. Load config and set seeds
+2. Load train/test data
+3. Preprocess and select features
+4. Train ML models
+5. Reduce features for DL + train DL model
+6. Evaluate all models
+7. Save metrics, plots, and run metadata
 
 ### `requirements.txt`
-Dependency list for Python packages needed by the project.
+Python dependencies.
 
----
-
-## `src/` package
+## `src/`
 
 ### `src/data_loader.py`
-- Loads CSV files from disk
-- Detects label column (e.g., `label`)
-- Drops ID-like columns if present
-- Splits features (`X`) and labels (`y`)
-- Aligns test columns to train columns
+Loads CSVs, detects label column, drops irrelevant ID columns, and aligns train/test feature schema.
 
 ### `src/preprocessing.py`
-- Builds reusable sklearn preprocessing pipeline
-- Missing value handling
-- Categorical encoding via `OneHotEncoder`
-- Numerical scaling via `StandardScaler`
-- Saves/loads fitted preprocessor object
+Reusable sklearn preprocessing pipeline (imputation + scaling + one-hot encoding) with save/load.
 
 ### `src/feature_engineering.py`
-- Provides optional feature selection utilities
-- Includes variance-threshold-based selector
-- Includes helper to reduce sparse dimensionality for DL when needed
+Feature selection (`VarianceThreshold`) and optional DL dimensionality reduction (`TruncatedSVD`) with persistence.
 
 ### `src/train_ml.py`
-Trains and saves traditional ML models:
-- Logistic Regression
-- Random Forest
-- SVM
-- KNN
+Trains/saves Logistic Regression, Random Forest, SVM, and KNN.
 
 ### `src/train_dl.py`
-Builds and trains deep learning model using TensorFlow/Keras:
-- Dense neural network with ReLU hidden layers
-- Sigmoid output for binary classification
-- Uses `EarlyStopping`
-- Uses `ModelCheckpoint`
-- Saves DL model artifacts
+Builds/trains Keras DNN, applies callbacks (`EarlyStopping`, `ModelCheckpoint`), and tunes decision threshold on validation set.
 
 ### `src/evaluate.py`
-Computes and stores model performance:
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion Matrix
-
-Saves:
-- `outputs/metrics.csv`
-- `outputs/metrics.json`
+Computes core + extended metrics (Accuracy, Precision, Recall, F1, Balanced Accuracy, MCC, ROC-AUC, PR-AUC), and writes CSV/JSON outputs.
 
 ### `src/visualize.py`
-Generates visual outputs:
-- Confusion matrix image for each model
-- Comparison bar chart across models
-
-Outputs are saved under `outputs/`.
+Saves confusion matrix images for each model and a grouped model-comparison bar chart.
 
 ### `src/utils.py`
-Shared helper utilities:
-- path constants
-- directory creation helpers
-- logging setup
-- JSON helpers
-
----
+Shared helpers for logging, config loading, directory setup, JSON I/O, and run metadata assembly.
 
 ## `app/`
 
 ### `app/dashboard.py`
-Streamlit UI for inspecting model results:
-- Sidebar model selector
-- Metrics display
-- Confusion matrix rendering
-- Model comparison display
-- Optional uploaded CSV preview
+Streamlit UI with tabs:
+- **Overview** (table + ranking chart + metadata)
+- **Model Detail** (metrics cards + confusion matrix)
+- **Artifacts** (saved plot preview + CSV download + optional uploaded CSV preview)

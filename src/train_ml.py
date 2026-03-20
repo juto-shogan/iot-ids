@@ -14,16 +14,16 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
 
-def build_ml_models() -> Dict[str, object]:
+def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
     """Instantiate baseline ML models for binary intrusion detection."""
     return {
-        "Logistic Regression": LogisticRegression(max_iter=600, n_jobs=-1),
+        "Logistic Regression": LogisticRegression(max_iter=600, n_jobs=-1, random_state=random_seed),
         "Random Forest": RandomForestClassifier(
             n_estimators=250,
-            random_state=42,
+            random_state=random_seed,
             n_jobs=-1,
         ),
-        "SVM": SVC(kernel="rbf", C=1.0, gamma="scale"),
+        "SVM": SVC(kernel="rbf", C=1.0, gamma="scale", probability=True, random_state=random_seed),
         "KNN": KNeighborsClassifier(n_neighbors=7),
     }
 
@@ -47,9 +47,10 @@ def train_ml_models(
     y_train,
     models_dir: Path,
     svm_max_samples: int | None = 30000,
+    random_seed: int = 42,
 ) -> Dict[str, object]:
     """Train and persist all traditional ML models."""
-    models = build_ml_models()
+    models = build_ml_models(random_seed=random_seed)
     trained_models: Dict[str, object] = {}
 
     for model_name, model in models.items():

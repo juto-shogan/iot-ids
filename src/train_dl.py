@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 from scipy.sparse import issparse
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 
 
@@ -25,6 +26,22 @@ def _to_dense_float32(x_data) -> np.ndarray:
     if issparse(x_data):
         x_data = x_data.toarray()
     return np.asarray(x_data, dtype=np.float32)
+
+
+def tune_threshold(y_true: np.ndarray, probabilities: np.ndarray) -> float:
+    """Find threshold maximizing F1 on validation set."""
+    candidate_thresholds = np.linspace(0.2, 0.8, 31)
+    best_threshold = 0.5
+    best_score = -1.0
+
+    for threshold in candidate_thresholds:
+        preds = (probabilities >= threshold).astype(int)
+        score = f1_score(y_true, preds, zero_division=0)
+        if score > best_score:
+            best_score = score
+            best_threshold = float(threshold)
+
+    return best_threshold
 
 
 def build_dl_model(input_dim: int) -> tf.keras.Model:
@@ -94,14 +111,18 @@ def train_dl_model(
         callbacks=callbacks,
     )
 
+    val_probs = model.predict(x_val, verbose=0).flatten()
+    best_threshold = tune_threshold(y_val.astype(int), val_probs)
+
     final_model_path = models_dir / "dl_model.keras"
     model.save(final_model_path)
 
-    return model
+    return model, best_threshold
 
 
-def predict_dl(model: tf.keras.Model, x_test) -> np.ndarray:
-    """Generate binary predictions for deep learning model."""
+def predict_dl(model: tf.keras.Model, x_test, threshold: float = 0.5) -> tuple[np.ndarray, np.ndarray]:
+    """Generate probabilities and binary predictions for deep learning model."""
     x_test_dense = _to_dense_float32(x_test)
     probabilities = model.predict(x_test_dense, verbose=0).flatten()
-    return (probabilities >= 0.5).astype(int)
+    predictions = (probabilities >= threshold).astype(int)
+    return probabilities, predictions

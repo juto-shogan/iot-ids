@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Tuple
+from pathlib import Path
 
+import joblib
 from scipy.sparse import issparse
+from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import VarianceThreshold
 
 
@@ -22,17 +24,40 @@ class FeatureSelector:
         """Transform features using an already-fitted selector."""
         return self.selector.transform(x_data)
 
+    def save(self, path: Path) -> None:
+        """Persist fitted selector."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self.selector, path)
 
-def prepare_features_for_dl(x_train, x_test, max_features: int | None = 256) -> Tuple[object, object]:
-    """Optionally reduce high-dimensional sparse matrices for DL compatibility."""
-    if not issparse(x_train) or max_features is None:
-        return x_train, x_test
 
-    from sklearn.decomposition import TruncatedSVD
+class DLFeatureReducer:
+    """Optional dimensionality reducer for DL inputs."""
 
-    n_components = min(max_features, x_train.shape[1] - 1)
-    if n_components < 2:
-        return x_train, x_test
+    def __init__(self, max_features: int | None = 256) -> None:
+        self.max_features = max_features
+        self.reducer: TruncatedSVD | None = None
 
-    reducer = TruncatedSVD(n_components=n_components, random_state=42)
-    return reducer.fit_transform(x_train), reducer.transform(x_test)
+    def fit_transform(self, x_data):
+        """Fit dimensionality reducer and transform training data."""
+        if not issparse(x_data) or self.max_features is None:
+            return x_data
+
+        n_components = min(self.max_features, x_data.shape[1] - 1)
+        if n_components < 2:
+            return x_data
+
+        self.reducer = TruncatedSVD(n_components=n_components, random_state=42)
+        return self.reducer.fit_transform(x_data)
+
+    def transform(self, x_data):
+        """Transform test data with fitted reducer if available."""
+        if self.reducer is None:
+            return x_data
+        return self.reducer.transform(x_data)
+
+    def save(self, path: Path) -> None:
+        """Persist reducer only when fitted."""
+        if self.reducer is None:
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self.reducer, path)
