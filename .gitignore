@@ -3,3 +3,5 @@ data/
 # Trained artifacts generated locally
 models/*
 !models/.gitkeep
+src\__pycache__/
+*.pyc
