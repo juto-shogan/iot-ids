@@ -5,12 +5,10 @@ random_seed: 42
 # 2) single_file_split: provide single_file + test_size
 # For external datasets (e.g., Kaggle), set label_column explicitly.
 data:
-  mode: separate_files
-  train_file: data/UNSW_NB15_training-set.csv
-  test_file: data/UNSW_NB15_testing-set.csv
-  # single_file: data/Iot_Network_data.csv
+  mode: single_file_split
+  single_file: data/Iot_Network_data.csv
   test_size: 0.2
-  label_column: null
+  label_column: ['packet_size', 'transmission_time', 'protocol_type', 'bandwidth_usage', 'latency', 'jitter', 'packet_loss_rate', 'device_id', 'device_type', 'energy_usage', 'allocated_bandwidth']
   drop_columns: [id, ID, record_id, Record_ID]
 
 paths:
