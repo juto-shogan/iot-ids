@@ -76,18 +76,19 @@ def evaluate_all_models(
     trained_ml_models: Dict[str, object],
     dl_model,
     dl_threshold: float,
-    x_test,
+    x_test_ml,
+    x_test_dl,
     y_test,
 ) -> dict:
     """Evaluate all trained models and return structured metrics."""
     results: dict[str, dict] = {}
 
     for model_name, model in trained_ml_models.items():
-        predictions = model.predict(x_test)
-        scores = _get_model_scores(model, x_test)
+        predictions = model.predict(x_test_ml)
+        scores = _get_model_scores(model, x_test_ml)
         results[model_name] = evaluate_predictions(y_test, predictions, y_score=scores)
 
-    dl_probs, dl_predictions = predict_dl(dl_model, x_test, threshold=dl_threshold)
+    dl_probs, dl_predictions = predict_dl(dl_model, x_test_dl, threshold=dl_threshold)
     min_len = min(len(y_test), len(dl_predictions))
     results["Deep Learning"] = evaluate_predictions(
         y_test.iloc[:min_len],

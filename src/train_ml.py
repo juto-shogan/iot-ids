@@ -17,7 +17,7 @@ from sklearn.svm import SVC
 def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
     """Instantiate baseline ML models for binary intrusion detection."""
     return {
-        "Logistic Regression": LogisticRegression(max_iter=600, n_jobs=-1, random_state=random_seed),
+        "Logistic Regression": LogisticRegression(max_iter=600, random_state=random_seed),
         "Random Forest": RandomForestClassifier(
             n_estimators=250,
             random_state=random_seed,

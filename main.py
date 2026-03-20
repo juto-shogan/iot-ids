@@ -114,7 +114,8 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
         trained_ml_models=ml_models,
         dl_model=dl_model,
         dl_threshold=dl_threshold,
-        x_test=x_test_dl,
+        x_test_ml=x_test_selected,
+        x_test_dl=x_test_dl,
         y_test=y_test,
     )
 
