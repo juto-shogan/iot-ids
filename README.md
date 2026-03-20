@@ -1,1 +1,3 @@
-# iot-ids; https://www.kaggle.com/datasets/programmer3/iot-network-traffic-dataset?resource=download
+# iot-ids;
+
+https://research.unsw.edu.au/projects/unsw-nb15-dataset
