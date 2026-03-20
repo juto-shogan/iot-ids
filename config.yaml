@@ -1,0 +1,17 @@
+random_seed: 42
+paths:
+  train_file: data/UNSW_NB15_training-set.csv
+  test_file: data/UNSW_NB15_testing-set.csv
+  models_dir: models
+  outputs_dir: outputs
+preprocessing:
+  variance_threshold: 0.0
+ml:
+  svm_max_samples: 30000
+dl:
+  enabled: true
+  epochs: 20
+  batch_size: 256
+  max_samples: 60000
+  max_features: 256
+  threshold_metric: f1
