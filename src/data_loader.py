@@ -8,7 +8,11 @@ from typing import Tuple
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-LABEL_CANDIDATES = ["label", "Label", "class", "Class", "target", "Target"]
+LABEL_CANDIDATES = [
+    "label", "Label", "class", "Class", "target", "Target",
+    "attack", "Attack", "is_attack", "IsAttack", "anomaly", "Anomaly",
+    "malicious", "Malicious", "outcome", "Outcome",
+]
 DEFAULT_DROP_COLUMNS = ["id", "ID", "record_id", "Record_ID"]
 
 
@@ -21,11 +25,29 @@ def _detect_label_column(frame: pd.DataFrame, explicit_label: str | None = None)
             )
         return explicit_label
 
+    # 1) direct candidate match
     for candidate in LABEL_CANDIDATES:
         if candidate in frame.columns:
             return candidate
+
+    # 2) fuzzy keyword match in column names
+    keyword_hits = [
+        column
+        for column in frame.columns
+        if any(keyword in column.lower() for keyword in ["label", "class", "target", "attack", "anomaly"])
+    ]
+    if len(keyword_hits) == 1:
+        return keyword_hits[0]
+
+    # 3) fallback: pick binary-like non-feature column if unique values are small
+    for column in frame.columns:
+        unique_count = frame[column].nunique(dropna=True)
+        if unique_count == 2:
+            return column
+
     raise ValueError(
-        f"Could not find a label column. Tried: {LABEL_CANDIDATES}. "
+        "Could not infer a label column automatically. "
+        "Please set data.label_column in config.yaml. "
         f"Available columns: {list(frame.columns)}"
     )
 
@@ -52,7 +74,17 @@ def split_features_labels(
     clean_frame = _drop_irrelevant_columns(frame, drop_columns=drop_columns)
     label_column = _detect_label_column(clean_frame, explicit_label=label_column)
     x_data = clean_frame.drop(columns=[label_column])
-    y_data = clean_frame[label_column].astype(int)
+    y_series = clean_frame[label_column]
+    if pd.api.types.is_numeric_dtype(y_series):
+        y_data = y_series.astype(int)
+    else:
+        y_data, _ = pd.factorize(y_series.astype(str))
+        y_data = pd.Series(y_data, index=clean_frame.index, name=label_column).astype(int)
+
+    if y_data.nunique() > 2:
+        raise ValueError(
+            f"Label column '{label_column}' has {y_data.nunique()} classes; expected binary classification."
+        )
     return x_data, y_data
 
 
