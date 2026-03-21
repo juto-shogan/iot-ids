@@ -94,6 +94,15 @@ Dashboard features:
 - artifact tab with multi-plot gallery (comparison, heatmap, radar, ROC, PR) + CSV download
 - refresh control to reload latest outputs
 
+
+### Run Final Presentation Dashboard (Deep Learning Focus)
+
+```bash
+streamlit run app/presentation.py
+```
+
+This page is designed for final presentation and highlights deep learning metrics, confusion matrix, architecture summary, techniques used, and run metadata.
+
 ## Notes
 
 - CPU-focused defaults; GPU is not required.
