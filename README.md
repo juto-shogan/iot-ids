@@ -103,6 +103,15 @@ streamlit run app/presentation.py
 
 This page is designed for final presentation and highlights deep learning metrics, confusion matrix, architecture summary, techniques used, and run metadata.
 
+
+### Generate ROC Comparison Figure (DL vs ML baselines)
+
+```bash
+python scripts/plot_roc.py
+```
+
+This creates `outputs/roc_comparison_presentation.png` using `outputs/curve_data.json`.
+
 ## Notes
 
 - CPU-focused defaults; GPU is not required.
