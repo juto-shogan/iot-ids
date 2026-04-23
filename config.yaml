@@ -11,19 +11,7 @@ data:
   # single_file: data/Iot_Network_data.csv
   test_size: 0.2
   label_column: null
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
   drop_columns: [id, ID, record_id, Record_ID, attack_cat]
-=======
-  drop_columns: [id, ID, record_id, Record_ID]
->>>>>>> theirs
-=======
-  drop_columns: [id, ID, record_id, Record_ID]
->>>>>>> theirs
-=======
-  drop_columns: [id, ID, record_id, Record_ID]
->>>>>>> theirs
 
 paths:
   models_dir: models
