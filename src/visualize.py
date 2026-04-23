@@ -57,7 +57,11 @@ def plot_confusion_matrices(results: dict, outputs_dir: Path) -> list[Path]:
 
 
 def plot_model_comparison(results: dict, outputs_dir: Path) -> Path:
-    """Create grouped bar chart comparing model performance metrics."""
+    """
+    Create grouped bar chart comparing model performance metrics.
+
+    Useful for presentation-level comparison across many metrics at once.
+    """
     outputs_dir.mkdir(parents=True, exist_ok=True)
 
     rows = []
@@ -84,7 +88,11 @@ def plot_model_comparison(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_metric_heatmap(results: dict, outputs_dir: Path) -> Path:
-    """Create heatmap across models and selected metrics."""
+    """
+    Create heatmap across models and selected metrics.
+
+    Heatmaps make it easy to spot globally strong/weak models quickly.
+    """
     rows = []
     for model_name, metrics in results.items():
         row = {"model": model_name}
@@ -104,7 +112,11 @@ def plot_metric_heatmap(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_radar_chart(results: dict, outputs_dir: Path) -> Path:
-    """Create radar chart for core metrics per model."""
+    """
+    Create radar chart for core metrics per model.
+
+    Radar plots are helpful for communicating tradeoffs in one compact view.
+    """
     radar_metrics = ["accuracy", "precision", "recall", "f1_score", "balanced_accuracy", "specificity"]
     labels = np.array(radar_metrics)
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False)
@@ -131,7 +143,11 @@ def plot_radar_chart(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_roc_curves(curve_data: dict, outputs_dir: Path) -> Path:
-    """Plot ROC curves for all models with score traces."""
+    """
+    Plot ROC curves for all models with score traces.
+
+    ROC emphasizes ranking quality over all thresholds.
+    """
     plt.figure(figsize=(8, 6))
     for model_name, payload in curve_data.items():
         y_true = np.array(payload["y_true"]) 
@@ -153,7 +169,11 @@ def plot_roc_curves(curve_data: dict, outputs_dir: Path) -> Path:
 
 
 def plot_pr_curves(curve_data: dict, outputs_dir: Path) -> Path:
-    """Plot precision-recall curves for all models with score traces."""
+    """
+    Plot precision-recall curves for all models with score traces.
+
+    PR curves are especially informative for attack-detection class imbalance.
+    """
     plt.figure(figsize=(8, 6))
     for model_name, payload in curve_data.items():
         y_true = np.array(payload["y_true"]) 

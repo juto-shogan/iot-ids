@@ -71,6 +71,7 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
     logging.info("Loading dataset based on config mode.")
     x_train, y_train, x_test, y_test = load_data_by_config(config, PROJECT_ROOT)
 
+    # Step 1: preprocess raw features with train-fitted transforms.
     logging.info("Applying preprocessing pipeline.")
     x_train_processed, x_test_processed, _ = preprocess_train_test(
         x_train=x_train,
@@ -78,12 +79,14 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
         preprocessor_path=models_dir / "preprocessor.joblib",
     )
 
+    # Step 2: remove near-constant/noisy features.
     logging.info("Performing feature selection.")
     selector = FeatureSelector(threshold=float(config["preprocessing"].get("variance_threshold", 0.0)))
     x_train_selected = selector.fit_transform(x_train_processed)
     x_test_selected = selector.transform(x_test_processed)
     selector.save(models_dir / "feature_selector.joblib")
 
+    # Step 3: train classic ML baselines.
     logging.info("Training traditional ML models.")
     ml_models = train_ml_models(
         x_train=x_train_selected,
@@ -97,12 +100,14 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
     if not dl_enabled:
         raise ValueError("DL model is disabled in config; current pipeline expects DL enabled.")
 
+    # Step 4: reduce sparse dimensionality for DL efficiency.
     logging.info("Preparing DL-specific reduced features.")
     reducer = DLFeatureReducer(max_features=config["dl"].get("max_features", 256))
     x_train_dl = reducer.fit_transform(x_train_selected)
     x_test_dl = reducer.transform(x_test_selected)
     reducer.save(models_dir / "dl_reducer.joblib")
 
+    # Step 5: train DNN and tune threshold on validation split.
     logging.info("Training deep learning model.")
     dl_model, dl_threshold = train_dl_model(
         x_train=x_train_dl,
@@ -113,6 +118,7 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
         max_samples=config["dl"].get("max_samples", 60000),
     )
 
+    # Step 6: compute evaluation metrics and score traces.
     logging.info("Evaluating all models.")
     results, curve_data = evaluate_all_models(
         trained_ml_models=ml_models,
@@ -123,6 +129,7 @@ def run_pipeline(config_path: str = "config.yaml") -> dict:
         y_test=y_test,
     )
 
+    # Step 7: persist tabular metrics + all publication-ready plots.
     logging.info("Saving metrics and visualizations.")
     save_metrics(results, outputs_dir)
     save_curve_data(curve_data, outputs_dir)

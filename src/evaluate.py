@@ -1,4 +1,10 @@
-"""Evaluation routines for IDS classifiers."""
+"""
+Evaluation routines for IDS classifiers.
+
+This module is intentionally verbose because it is often used in reports and
+presentations. The goal is to make *why* a metric exists as clear as *how* it
+is computed.
+"""
 
 from __future__ import annotations
 
@@ -24,7 +30,14 @@ from src.utils import save_json
 
 
 def _compute_score_metrics(y_true, y_score) -> dict:
-    """Compute score-based metrics safely."""
+    """
+    Compute score-based metrics safely.
+
+    Why these metrics matter:
+    - ROC-AUC: measures ranking quality across all thresholds.
+    - PR-AUC: focuses on positive class quality and is useful when class
+      imbalance exists (common in intrusion detection).
+    """
     metrics = {"roc_auc": None, "pr_auc": None}
     try:
         metrics["roc_auc"] = float(roc_auc_score(y_true, y_score))
@@ -40,6 +53,24 @@ def _compute_score_metrics(y_true, y_score) -> dict:
 
 
 def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
+    """
+    Compute core binary classification metrics and confusion matrix.
+
+    Metric notes for IDS context:
+    - Accuracy: global correctness, but can hide class imbalance effects.
+    - Precision: among alerts, how many are true attacks (alert quality).
+    - Recall: among real attacks, how many were caught (detection coverage).
+    - F1-score: balance of precision/recall when both matter.
+    - Balanced accuracy: average recall across classes; robust to imbalance.
+    - MCC: strong single-score summary that includes all confusion terms.
+    - Specificity / FPR: normal-traffic protection vs false alarm rate.
+    - NPV / FNR: confidence in "normal" predictions and missed-attack rate.
+    """
+    # Confusion terms are foundational for nearly every security metric.
+    # tn: benign correctly predicted benign
+    # fp: benign incorrectly predicted attack (false alarm)
+    # fn: attack incorrectly predicted benign (missed attack)
+    # tp: attack correctly predicted attack
     """Compute core binary classification metrics and confusion matrix."""
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
     specificity = float(tn / (tn + fp)) if (tn + fp) else 0.0
@@ -71,6 +102,8 @@ def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
 
 def _get_model_scores(model, x_test):
     """Get continuous model scores for AUC metrics when available."""
+    # decision_function often exists for margin-based models (e.g., SVM) and is
+    # usually faster than calibrated probabilities while still valid for AUC.
     if hasattr(model, "decision_function"):
         return model.decision_function(x_test)
 
@@ -91,7 +124,12 @@ def evaluate_all_models(
     x_test_dl,
     y_test,
 ) -> tuple[dict, dict]:
-    """Evaluate all trained models and return structured metrics and curve data."""
+    """
+    Evaluate all trained models and return structured metrics and curve data.
+
+    `curve_data` stores raw score traces so ROC/PR curves can be recreated later
+    without retraining models.
+    """
     results: dict[str, dict] = {}
     curve_data: dict[str, dict] = {}
 
@@ -106,6 +144,7 @@ def evaluate_all_models(
                 "y_score": pd.Series(scores).astype(float).tolist(),
             }
 
+    # Deep learning path uses its tuned decision threshold from validation.
     logging.info("Evaluating Deep Learning model...")
     dl_probs, dl_predictions = predict_dl(dl_model, x_test_dl, threshold=dl_threshold)
     min_len = min(len(y_test), len(dl_predictions))
@@ -127,7 +166,11 @@ def evaluate_all_models(
 
 
 def save_metrics(results: dict, outputs_dir: Path) -> Path:
-    """Save flattened metric table as CSV and full payload as JSON."""
+    """Save flattened metric table as CSV and full payload as JSON.
+
+    CSV is convenient for spreadsheet/report workflows; JSON preserves
+    full structure for downstream tooling and dashboards.
+    """
     outputs_dir.mkdir(parents=True, exist_ok=True)
 
     metrics_rows = []

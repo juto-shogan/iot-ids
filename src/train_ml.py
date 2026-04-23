@@ -15,7 +15,14 @@ from sklearn.svm import SVC
 
 
 def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
-    """Instantiate baseline ML models for binary intrusion detection."""
+    """Instantiate baseline ML models for binary intrusion detection.
+
+    Why these models:
+    - Logistic Regression: strong linear baseline and interpretable coefficients.
+    - Random Forest: robust non-linear ensemble with good tabular performance.
+    - SVM (RBF): margin-based non-linear classifier for complex boundaries.
+    - KNN: distance-based local baseline for comparative analysis.
+    """
     return {
         "Logistic Regression": LogisticRegression(max_iter=600, random_state=random_seed),
         "Random Forest": RandomForestClassifier(
@@ -29,6 +36,9 @@ def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
 
 
 def _sample_if_needed(x_data, y_data, max_samples: int | None):
+    """
+    Subsample data for expensive models to keep runtime CPU-friendly.
+    """
     if max_samples is None or len(y_data) <= max_samples:
         return x_data, y_data
 
@@ -49,7 +59,12 @@ def train_ml_models(
     svm_max_samples: int | None = 30000,
     random_seed: int = 42,
 ) -> Dict[str, object]:
-    """Train and persist all traditional ML models."""
+    """
+    Train and persist all traditional ML models.
+
+    Each trained estimator is saved to `models/` so dashboards and prediction
+    flows can reuse them without retraining.
+    """
     models = build_ml_models(random_seed=random_seed)
     trained_models: Dict[str, object] = {}
 

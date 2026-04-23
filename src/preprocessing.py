@@ -14,16 +14,24 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
 class Preprocessor:
-    """Wrapper around sklearn preprocessing objects for consistent train/test transforms."""
+    """
+    Wrapper around sklearn preprocessing objects for consistent train/test transforms.
+
+    Consistency is critical: fitting on train and reusing identical transforms on
+    test/inference prevents leakage and schema drift.
+    """
 
     def __init__(self) -> None:
         self.transformer: ColumnTransformer | None = None
 
     @staticmethod
     def _build_transformer(x_data: pd.DataFrame) -> ColumnTransformer:
+        """
+        Build mixed-type preprocessing graph for tabular IDS features."""
         numeric_columns = x_data.select_dtypes(include=["number"]).columns.tolist()
         categorical_columns = x_data.select_dtypes(exclude=["number"]).columns.tolist()
 
+        # Numeric features: median imputation + z-score scaling.
         numeric_pipeline = Pipeline(
             steps=[
                 ("imputer", SimpleImputer(strategy="median")),
@@ -31,6 +39,7 @@ class Preprocessor:
             ]
         )
 
+        # Categorical features: most-frequent imputation + one-hot encoding.
         categorical_pipeline = Pipeline(
             steps=[
                 ("imputer", SimpleImputer(strategy="most_frequent")),

@@ -134,7 +134,12 @@ def _extract_raw_schema(preprocessor) -> tuple[list[str], list[str], dict]:
 
 
 def _predict_single_row(model_name: str, input_df: pd.DataFrame, artifacts: dict, payload: dict) -> tuple[int, float | None]:
-    """Run single-row inference for selected model."""
+    """
+    Run single-row inference for selected model.
+
+    Uses exactly the same preprocessing + feature selection pipeline as training,
+    which is essential for consistent predictions.
+    """
     preprocessor = artifacts["preprocessor"]
     selector = artifacts["selector"]
 
@@ -152,6 +157,8 @@ def _predict_single_row(model_name: str, input_df: pd.DataFrame, artifacts: dict
             x_dl = x_dl.toarray()
 
         prob = float(dl_model.predict(x_dl, verbose=0).flatten()[0])
+        
+        # Deep learning threshold is tuned during training (not always 0.5).
         threshold = payload.get("Deep Learning", {}).get("threshold", 0.5)
         pred = int(prob >= threshold)
         return pred, prob
