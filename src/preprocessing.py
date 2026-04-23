@@ -14,7 +14,8 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
 class Preprocessor:
-    """Wrapper around sklearn preprocessing objects for consistent train/test transforms.
+    """
+    Wrapper around sklearn preprocessing objects for consistent train/test transforms.
 
     Consistency is critical: fitting on train and reusing identical transforms on
     test/inference prevents leakage and schema drift.
@@ -25,7 +26,8 @@ class Preprocessor:
 
     @staticmethod
     def _build_transformer(x_data: pd.DataFrame) -> ColumnTransformer:
-        """Build mixed-type preprocessing graph for tabular IDS features."""
+        """
+        Build mixed-type preprocessing graph for tabular IDS features."""
         numeric_columns = x_data.select_dtypes(include=["number"]).columns.tolist()
         categorical_columns = x_data.select_dtypes(exclude=["number"]).columns.tolist()
 

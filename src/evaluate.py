@@ -1,4 +1,5 @@
-"""Evaluation routines for IDS classifiers.
+"""
+Evaluation routines for IDS classifiers.
 
 This module is intentionally verbose because it is often used in reports and
 presentations. The goal is to make *why* a metric exists as clear as *how* it
@@ -29,7 +30,8 @@ from src.utils import save_json
 
 
 def _compute_score_metrics(y_true, y_score) -> dict:
-    """Compute score-based metrics safely.
+    """
+    Compute score-based metrics safely.
 
     Why these metrics matter:
     - ROC-AUC: measures ranking quality across all thresholds.
@@ -51,7 +53,8 @@ def _compute_score_metrics(y_true, y_score) -> dict:
 
 
 def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
-    """Compute core binary classification metrics and confusion matrix.
+    """
+    Compute core binary classification metrics and confusion matrix.
 
     Metric notes for IDS context:
     - Accuracy: global correctness, but can hide class imbalance effects.
@@ -68,6 +71,7 @@ def evaluate_predictions(y_true, y_pred, y_score=None) -> dict:
     # fp: benign incorrectly predicted attack (false alarm)
     # fn: attack incorrectly predicted benign (missed attack)
     # tp: attack correctly predicted attack
+    """Compute core binary classification metrics and confusion matrix."""
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
     specificity = float(tn / (tn + fp)) if (tn + fp) else 0.0
     npv = float(tn / (tn + fn)) if (tn + fn) else 0.0
@@ -120,7 +124,8 @@ def evaluate_all_models(
     x_test_dl,
     y_test,
 ) -> tuple[dict, dict]:
-    """Evaluate all trained models and return structured metrics and curve data.
+    """
+    Evaluate all trained models and return structured metrics and curve data.
 
     `curve_data` stores raw score traces so ROC/PR curves can be recreated later
     without retraining models.

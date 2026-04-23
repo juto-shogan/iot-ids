@@ -57,7 +57,8 @@ def plot_confusion_matrices(results: dict, outputs_dir: Path) -> list[Path]:
 
 
 def plot_model_comparison(results: dict, outputs_dir: Path) -> Path:
-    """Create grouped bar chart comparing model performance metrics.
+    """
+    Create grouped bar chart comparing model performance metrics.
 
     Useful for presentation-level comparison across many metrics at once.
     """
@@ -87,7 +88,8 @@ def plot_model_comparison(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_metric_heatmap(results: dict, outputs_dir: Path) -> Path:
-    """Create heatmap across models and selected metrics.
+    """
+    Create heatmap across models and selected metrics.
 
     Heatmaps make it easy to spot globally strong/weak models quickly.
     """
@@ -110,7 +112,8 @@ def plot_metric_heatmap(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_radar_chart(results: dict, outputs_dir: Path) -> Path:
-    """Create radar chart for core metrics per model.
+    """
+    Create radar chart for core metrics per model.
 
     Radar plots are helpful for communicating tradeoffs in one compact view.
     """
@@ -140,7 +143,8 @@ def plot_radar_chart(results: dict, outputs_dir: Path) -> Path:
 
 
 def plot_roc_curves(curve_data: dict, outputs_dir: Path) -> Path:
-    """Plot ROC curves for all models with score traces.
+    """
+    Plot ROC curves for all models with score traces.
 
     ROC emphasizes ranking quality over all thresholds.
     """
@@ -165,7 +169,8 @@ def plot_roc_curves(curve_data: dict, outputs_dir: Path) -> Path:
 
 
 def plot_pr_curves(curve_data: dict, outputs_dir: Path) -> Path:
-    """Plot precision-recall curves for all models with score traces.
+    """
+    Plot precision-recall curves for all models with score traces.
 
     PR curves are especially informative for attack-detection class imbalance.
     """

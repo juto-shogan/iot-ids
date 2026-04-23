@@ -36,7 +36,9 @@ def build_ml_models(random_seed: int = 42) -> Dict[str, object]:
 
 
 def _sample_if_needed(x_data, y_data, max_samples: int | None):
-    """Subsample data for expensive models to keep runtime CPU-friendly."""
+    """
+    Subsample data for expensive models to keep runtime CPU-friendly.
+    """
     if max_samples is None or len(y_data) <= max_samples:
         return x_data, y_data
 
@@ -57,7 +59,8 @@ def train_ml_models(
     svm_max_samples: int | None = 30000,
     random_seed: int = 42,
 ) -> Dict[str, object]:
-    """Train and persist all traditional ML models.
+    """
+    Train and persist all traditional ML models.
 
     Each trained estimator is saved to `models/` so dashboards and prediction
     flows can reuse them without retraining.

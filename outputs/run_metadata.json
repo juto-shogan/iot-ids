@@ -1,0 +1,52 @@
+{
+  "timestamp_utc": "2026-03-20T18:45:34.164525+00:00",
+  "config": {
+    "random_seed": 42,
+    "data": {
+      "mode": "separate_files",
+      "train_file": "data/UNSW_NB15_training-set.csv",
+      "test_file": "data/UNSW_NB15_testing-set.csv",
+      "test_size": 0.2,
+      "label_column": null,
+      "drop_columns": [
+        "id",
+        "ID",
+        "record_id",
+        "Record_ID",
+        "attack_cat"
+      ]
+    },
+    "paths": {
+      "models_dir": "models",
+      "outputs_dir": "outputs"
+    },
+    "preprocessing": {
+      "variance_threshold": 0.0
+    },
+    "ml": {
+      "svm_max_samples": 30000
+    },
+    "dl": {
+      "enabled": true,
+      "epochs": 20,
+      "batch_size": 256,
+      "max_samples": 60000,
+      "max_features": 256,
+      "threshold_metric": "f1"
+    }
+  },
+  "extra": {
+    "elapsed_seconds": 5323.82,
+    "x_train_shape": [
+      175341,
+      42
+    ],
+    "x_test_shape": [
+      82332,
+      42
+    ],
+    "train_positive_rate": 0.6806223302022916,
+    "test_positive_rate": 0.5506000097167566,
+    "dl_threshold": 0.56
+  }
+}

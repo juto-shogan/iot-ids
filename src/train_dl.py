@@ -49,7 +49,8 @@ def tune_threshold(y_true: np.ndarray, probabilities: np.ndarray) -> float:
 
 
 def build_dl_model(input_dim: int) -> tf.keras.Model:
-    """Create a compact feed-forward neural network for binary classification.
+    """
+    Create a compact feed-forward neural network for binary classification.
 
     Architecture rationale:
     - Dense ReLU layers for non-linear tabular interactions.
@@ -82,7 +83,8 @@ def train_dl_model(
     batch_size: int = 256,
     max_samples: int | None = 60000,
 ):
-    """Train and save deep neural network model with callbacks.
+    """
+    Train and save deep neural network model with callbacks.
 
     EarlyStopping limits overfitting and unnecessary epochs.
     ModelCheckpoint keeps best validation snapshot for stability.

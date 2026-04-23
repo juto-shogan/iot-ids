@@ -11,7 +11,8 @@ from sklearn.feature_selection import VarianceThreshold
 
 
 class FeatureSelector:
-    """Remove near-constant features using a configurable variance threshold.
+    """
+    Remove near-constant features using a configurable variance threshold.
 
     Near-constant columns add noise and computation while contributing little to
     decision boundaries.
@@ -35,7 +36,8 @@ class FeatureSelector:
 
 
 class DLFeatureReducer:
-    """Optional dimensionality reducer for DL inputs.
+    """
+    Optional dimensionality reducer for DL inputs.
 
     One-hot encoded IDS data can be high-dimensional and sparse; TruncatedSVD
     helps keep DL training memory and latency manageable on CPU.
